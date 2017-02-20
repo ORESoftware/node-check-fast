@@ -1,0 +1,38 @@
+{
+  "name": "node-check-fast",
+  "version": "0.0.1001",
+  "description": "Run node -c as fast as possible on .js files in a project",
+  "main": "index.js",
+  "scripts": {
+    "test": "suman"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ORESoftware/node-check-fast.git"
+  },
+  "keywords": [
+    "node",
+    "check",
+    "-c",
+    "fast",
+    "performant",
+    "git",
+    "github",
+    "test",
+    "testing"
+  ],
+  "author": "Olegzandr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ORESoftware/node-check-fast/issues"
+  },
+  "homepage": "https://github.com/ORESoftware/node-check-fast#readme",
+  "dependencies": {
+    "async": "^2.1.5",
+    "lodash.flattendeep": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.5",
+    "suman": "github:sumanjs/suman#dev"
+  }
+}
