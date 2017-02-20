@@ -105,11 +105,11 @@ export = function (opts: NCFOpts, cb: Callback) {
   const $typeF = ['-type f'];
 
   const $path = paths.map(function (p: String) {
-    return ' -path \"' + String(p).trim() + '\"';
+    return ' -path \"' + String(p).trim() + '\" ';
   });
 
   const $notPath = notPaths.map(function (p: String) {
-    return ' -not -path \"' + String(p).trim() + '\"';
+    return ' -not -path \"' + String(p).trim() + '\" ';
   });
 
   console.log('$path', util.inspect($path));

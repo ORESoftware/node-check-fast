@@ -56,10 +56,10 @@ module.exports = function (opts, cb) {
     var $maxD = ['-maxdepth', "" + maxDepth].join(' ');
     var $typeF = ['-type f'];
     var $path = paths.map(function (p) {
-        return ' -path \"' + String(p).trim() + '\"';
+        return ' -path \"' + String(p).trim() + '\" ';
     });
     var $notPath = notPaths.map(function (p) {
-        return ' -not -path \"' + String(p).trim() + '\"';
+        return ' -not -path \"' + String(p).trim() + '\" ';
     });
     console.log('$path', util.inspect($path));
     console.log('$notPath', util.inspect($notPath));
