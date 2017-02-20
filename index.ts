@@ -34,7 +34,7 @@ declare type Callback = (err: Error | String, data: Array<CalledBackData>) => vo
 
 export = function (opts: NCFOpts, cb: Callback) {
 
-    const root = opts.root;
+    const root = opts.root || '';
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
 
     const notPaths = opts.notPaths || ['**/node_modules/**'];
@@ -53,6 +53,8 @@ export = function (opts: NCFOpts, cb: Callback) {
     const $concurrency = opts.concurrency || cpuCount;
 
     function checkAll(files: Array<string>) {
+
+
 
         async.mapLimit(files, $concurrency, function (f: String, cb: Function) {
 
@@ -77,9 +79,14 @@ export = function (opts: NCFOpts, cb: Callback) {
                 cb(err, results);
             }
             else {
+
+               results = results.filter(function(r){
+                   return r.code > 0;
+               });
+
                 if (err) {
                     process.stderr.write('\n => Not all files were necessarily run, because:');
-                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
+                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results) + '\n\n');
                     process.exit(1);
                 }
                 else {

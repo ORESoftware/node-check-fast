@@ -8,7 +8,7 @@ var util = require('util');
 var flattenDeep = require('lodash.flattendeep');
 var cpuCount = os.cpus().length || 2;
 module.exports = function (opts, cb) {
-    var root = opts.root;
+    var root = opts.root || '';
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
     var notPaths = opts.notPaths || ['**/node_modules/**'];
     assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
@@ -36,9 +36,12 @@ module.exports = function (opts, cb) {
                 cb(err, results);
             }
             else {
+                results = results.filter(function (r) {
+                    return r.code > 0;
+                });
                 if (err) {
                     process.stderr.write('\n => Not all files were necessarily run, because:');
-                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
+                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results) + '\n\n');
                     process.exit(1);
                 }
                 else {
