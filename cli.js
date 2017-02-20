@@ -21,9 +21,18 @@ const options = [
     help: 'List of paths that do not match.'
   },
   {
+    names: ['verbose','v'],
+    type: 'bool',
+    help: 'Switch on verbosity which will show all files that are processed.'
+  },
+  {
     names: ['max-depth'],
     type: 'integer',
     help: 'Maximum depth to recurse through directories.'
+  },
+  {
+    names: ['concurrency'],
+    type: 'integer',
   },
   {
     names: ['root'],
@@ -60,10 +69,17 @@ const path = require('path');
 const cwd = process.cwd();
 
 if(!path.isAbsolute(root)){
-   opts.root = path.resolve(cwd + '/' + root);
+   root = path.resolve(cwd + '/' + root);
 }
 
 // here we go!
 // we don't pass a callback, so we will exit with the correct message and code
-nfc(opts);
+nfc({
+  root: root,
+  notPaths: opts.not_paths,
+  paths: opts.paths,
+  maxDepth: opts.max_depth,
+  verbose: opts.verbose,
+  concurrency: opts.concurrency
+});
 

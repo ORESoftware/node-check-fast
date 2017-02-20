@@ -16,19 +16,20 @@ module.exports = function (opts, cb) {
     assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
     var paths = opts.paths || ['*.js'];
     assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
-    if ('concurrency' in opts) {
-        assert(Number.isInteger(opts.concurrency), ' => "concurrency" option must be an integer.');
-    }
-    var $concurrency = opts.concurrency || cpuCount;
+    var concurrency = opts.concurrency || cpuCount;
+    assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
     function checkAll(files) {
-        async.mapLimit(files, $concurrency, function (f, cb) {
+        async.mapLimit(files, concurrency, function (f, cb) {
             var k = cp.spawn('bash');
-            var cmd = ['node', '-c', f].join(' ');
+            var cmd = ['node', '-c', "\'" + f + "\'"].join(' ');
             k.stdin.write('\n' + cmd + '\n');
             process.nextTick(function () {
                 k.stdin.end();
             });
             k.once('close', function (code) {
+                if (code < 1 && opts.verbose) {
+                    console.log(' => The following file was processed with no syntax errors => ', f);
+                }
                 cb(code && new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"'), { code: code, file: f });
             });
         }, function (err, results) {
@@ -45,6 +46,7 @@ module.exports = function (opts, cb) {
                     process.exit(1);
                 }
                 else {
+                    console.log(' => ', files.length, ' files checked with "node -c" for directory, and there appear to be zero syntax errors.');
                     process.exit(0);
                 }
             }
@@ -59,6 +61,8 @@ module.exports = function (opts, cb) {
     var $notPath = notPaths.map(function (p) {
         return ' -not -path \"' + String(p).trim() + '\"';
     });
+    console.log('$path', util.inspect($path));
+    console.log('$notPath', util.inspect($notPath));
     var cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
     var k = cp.spawn('bash');
     k.stdin.write('\n' + cmd + '\n');
