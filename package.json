@@ -1,6 +1,6 @@
 {
   "name": "node-check-fast",
-  "version": "0.0.1001",
+  "version": "0.0.1002",
   "description": "Run node -c as fast as possible on .js files in a project",
   "main": "index.js",
   "scripts": {
