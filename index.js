@@ -6,9 +6,8 @@ var os = require('os');
 var path = require('path');
 var util = require('util');
 var flattenDeep = require('lodash.flattendeep');
-var cpuCount = os.cpus().length;
-console.log('cpuCount => ', cpuCount);
-function default_1(opts) {
+var cpuCount = os.cpus().length || 2;
+module.exports = function (opts, cb) {
     var root = opts.root;
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
     var notPaths = opts.notPaths || ['**/node_modules/**'];
@@ -17,8 +16,12 @@ function default_1(opts) {
     assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
     var paths = opts.paths || ['*.js'];
     assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
+    if ('concurrency' in opts) {
+        assert(Number.isInteger(opts.concurrency), ' => "concurrency" option must be an integer.');
+    }
+    var $concurrency = opts.concurrency || cpuCount;
     function checkAll(files) {
-        async.mapLimit(files, cpuCount, function (f, cb) {
+        async.mapLimit(files, $concurrency, function (f, cb) {
             var k = cp.spawn('bash');
             var cmd = ['node', '-c', f].join(' ');
             k.stdin.write('\n' + cmd + '\n');
@@ -26,16 +29,21 @@ function default_1(opts) {
                 k.stdin.end();
             });
             k.once('close', function (code) {
-                cb(code, { code: code, file: f });
+                cb(code && new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"'), { code: code, file: f });
             });
         }, function (err, results) {
-            if (err) {
-                process.stderr.write('\n => Not all files were necessarily run, because:');
-                process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
-                process.exit(1);
+            if (cb) {
+                cb(err, results);
             }
             else {
-                process.exit(0);
+                if (err) {
+                    process.stderr.write('\n => Not all files were necessarily run, because:');
+                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
+                    process.exit(1);
+                }
+                else {
+                    process.exit(0);
+                }
             }
         });
     }
@@ -49,34 +57,46 @@ function default_1(opts) {
         return ' -not -path \"' + String(p).trim() + '\"';
     });
     var cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
-    console.log(cmd);
     var k = cp.spawn('bash');
     k.stdin.write('\n' + cmd + '\n');
     process.nextTick(function () {
         k.stdin.end();
     });
-    var d = '';
     k.stdout.setEncoding('utf8');
     k.stderr.setEncoding('utf8');
+    var stdout = '';
     k.stdout.on('data', function (data) {
-        d += data;
+        stdout += data;
     });
-    k.stderr.pipe(process.stderr);
+    var stderr = '';
+    k.stderr.on('data', function (d) {
+        stderr += d;
+    });
     k.once('close', function (code) {
         if (code > 0) {
-            process.stderr.write('Error: find command failed - \n' + cmd);
-            process.exit(1);
-        }
-        else {
-            if (d.length < 1) {
-                process.stderr.write('no files found.');
-                process.exit(1);
+            var err = 'Error: find command failed - \n' + cmd + '\n' + stderr;
+            if (cb) {
+                cb(err, []);
             }
             else {
-                checkAll(String(d).split('\n').filter(function (l) { return l; }));
+                process.stderr.write(err);
+                process.exit(1);
+            }
+        }
+        else {
+            var files = String(stdout).trim().split('\n').filter(function (l) { return l; });
+            if (files.length < 1) {
+                if (cb) {
+                    cb(null, []);
+                }
+                else {
+                    process.stderr.write('No files found.');
+                    process.exit(1);
+                }
+            }
+            else {
+                checkAll(files);
             }
         }
     });
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = default_1;
+};

@@ -10,13 +10,29 @@ const util = require('util');
 const flattenDeep = require('lodash.flattendeep');
 
 //project
-const cpuCount = os.cpus().length || 3;
-
+const cpuCount = os.cpus().length || 2;
 
 /////////////////////////////////////////////////////////////////////
 
+interface NCFOpts {
+    root: string,
+    notPaths?: Array<string>,
+    paths?: Array<string>
+    maxDepth?: number,
+    concurrency?: number
+}
 
-export default function (opts: any) {
+interface CalledBackData {
+    code: Number,
+    file: string
+}
+
+
+declare type Callback = (err: Error | String, data: Array<CalledBackData>) => void;
+
+//////////////////////////////////////////////////////////////////////
+
+export = function (opts: NCFOpts, cb: Callback) {
 
     const root = opts.root;
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
@@ -30,36 +46,45 @@ export default function (opts: any) {
     const paths = opts.paths || ['*.js'];
     assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
 
+    if('concurrency' in opts){
+        assert(Number.isInteger(opts.concurrency), ' => "concurrency" option must be an integer.');
+    }
+
+    const $concurrency = opts.concurrency || cpuCount;
 
     function checkAll(files: Array<string>) {
 
-
-        async.mapLimit(files, cpuCount, function (f: String, cb: Function) {
+        async.mapLimit(files, $concurrency, function (f: String, cb: Function) {
 
             const k = cp.spawn('bash');
 
-            const cmd = ['node','-c',f].join(' ');
+            const cmd = ['node', '-c', f].join(' ');
 
             k.stdin.write('\n' + cmd + '\n');
 
-            process.nextTick(function(){
-               k.stdin.end();
+            process.nextTick(function () {
+                k.stdin.end();
             });
 
-            k.once('close', function(code: Number){
-                cb(code, {code: code, file: f});
+            k.once('close', function (code: Number) {
+                cb(code && new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"'),
+                    {code: code, file: f});
             });
 
+        }, function (err: String | Error, results: Array<CalledBackData>) {
 
-        }, function (err: String | Error, results: Array<string>) {
-
-            if(err){
-                process.stderr.write('\n => Not all files were necessarily run, because:');
-                process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
-                process.exit(1);
+            if (cb) {
+                cb(err, results);
             }
-            else{
-                process.exit(0);
+            else {
+                if (err) {
+                    process.stderr.write('\n => Not all files were necessarily run, because:');
+                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results));
+                    process.exit(1);
+                }
+                else {
+                    process.exit(0);
+                }
             }
         });
 
@@ -77,16 +102,7 @@ export default function (opts: any) {
         return ' -not -path \"' + String(p).trim() + '\"';
     });
 
-
     const cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
-
-
-//   const command = 'find $(dirname "$DIR") -maxdepth 8 -type f  -path "*.js" -not -path "*/node_modules/*" \
-// -not -path "*/node_modules/*" -not -path "*/babel/*" -not -path "*/examples/*"';
-
-    console.log(cmd);
-
-
     const k = cp.spawn('bash');
 
     k.stdin.write('\n' + cmd + '\n');
@@ -95,37 +111,50 @@ export default function (opts: any) {
         k.stdin.end();
     });
 
-    var d = '';
-
     k.stdout.setEncoding('utf8');
     k.stderr.setEncoding('utf8');
 
-    k.stdout.on('data', function (data: String) {
-        d += data;
+    var stdout = '';
+
+    k.stdout.on('data', function (data: string) {
+        stdout += data;
     });
 
-    k.stderr.pipe(process.stderr);
+    var stderr = '';
+
+    k.stderr.on('data', function (d: string) {
+        stderr += d;
+    });
 
     k.once('close', function (code: Number) {
         if (code > 0) {
-            process.stderr.write('Error: find command failed - \n' + cmd);
-            process.exit(1);
+            const err = 'Error: find command failed - \n' + cmd + '\n' + stderr;
+            if (cb) {
+                cb(err,[]);
+            }
+            else {
+                process.stderr.write(err);
+                process.exit(1);
+            }
         }
         else {
 
-            if (d.length < 1) {
-                process.stderr.write('no files found.');
-                process.exit(1);
+            const files = String(stdout).trim().split('\n').filter(l => l);
+
+            if (files.length < 1) {
+                if (cb) {
+                    cb(null, []);
+                }
+                else {
+                    process.stderr.write('No files found.');
+                    process.exit(1);
+                }
             }
             else {
 
-                checkAll(String(d).split('\n').filter(l => l));
+                checkAll(files);
             }
-
-
         }
-
     });
-
 
 }

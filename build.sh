@@ -4,6 +4,4 @@
 cd $(dirname "$0") &&
 rm -rf node_modules &&
 npm install &&
-
-tsc  # builds the project
-tsc --project tsconfig-test.json # builds the tests
+./transpile.sh
