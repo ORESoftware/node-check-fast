@@ -1,9 +1,9 @@
 {
   "name": "node-check-fast",
-  "version": "0.0.1003",
+  "version": "0.0.1004",
   "description": "Run node -c as fast as possible on .js files in a project",
   "bin": {
-    "node-check-fast": "cli.js"
+    "ncf": "cli.js"
   },
   "main": "index.js",
   "scripts": {
