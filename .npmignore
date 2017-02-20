@@ -1,0 +1,11 @@
+node_modules
+.idea
+transpile.sh
+test.sh
+link.sh
+build.sh
+tsconfig-test.json
+tsconfig.json
+suman.conf.js
+.gitignore
+test
