@@ -11,12 +11,12 @@ var cpuCount = os.cpus().length || 2;
 module.exports = function (opts, cb) {
     var root = opts.root || process.cwd();
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
+    var paths = opts.paths || ['*.js'];
+    assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
     var notPaths = opts.notPaths || ['**/node_modules/**'];
     assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
     var maxDepth = opts.maxDepth || 12;
     assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
-    var paths = opts.paths || ['*.js'];
-    assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
     var concurrency = opts.concurrency || cpuCount;
     assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
     function checkAll(files) {
