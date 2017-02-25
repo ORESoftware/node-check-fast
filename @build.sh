@@ -4,4 +4,4 @@
 cd $(dirname "$0") &&
 rm -rf node_modules &&
 npm install &&
-./transpile.sh
+./@transpile.sh
