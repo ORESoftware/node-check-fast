@@ -1,9 +1,10 @@
 node_modules
 .idea
-transpile.sh
-test.sh
-link.sh
-build.sh
+@transpile.sh
+@test.sh
+@link.sh
+@build.sh
+@push.sh
 tsconfig-test.json
 tsconfig.json
 suman.conf.js
