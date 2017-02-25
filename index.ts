@@ -1,3 +1,4 @@
+
 //core
 const async = require('async');
 const cp = require('child_process');
@@ -20,7 +21,7 @@ interface NCFOpts {
   paths?: Array<string>
   maxDepth?: number,
   concurrency?: number,
-  verbose: boolean
+  verbose?: boolean
 }
 
 interface CalledBackData {
