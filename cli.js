@@ -11,33 +11,39 @@ const nfc = require(__dirname);
 
 const options = [
   {
-    name: 'paths',
+    names: ['help', 'h'],
+    type: 'bool',
+    help: 'Print help menu and exit.'
+  },
+  {
+    names: ['paths','p'],
     type: 'arrayOfString',
     help: 'List of paths to match.'
   },
   {
-    name: 'not-paths',
+    names: ['not-paths','np'],
     type: 'arrayOfString',
     help: 'List of paths that do not match.'
   },
   {
-    names: ['verbose','v'],
-    type: 'bool',
-    help: 'Switch on verbosity which will show all files that are processed.'
+    names: ['verbosity','v'],
+    type: 'integer',
+    help: 'Choose a verbosity level, {1,2,3} - higher the number the more verbose, default is 2.'
   },
   {
-    names: ['max-depth'],
+    names: ['max-depth','md'],
     type: 'integer',
     help: 'Maximum depth to recurse through directories.'
   },
   {
-    names: ['concurrency'],
-    type: 'integer',
+    names: ['concurrency','c'],
+    type: 'integer'
   },
   {
-    names: ['root'],
-    type: 'string',
-  },
+    names: ['root','rt'],
+    type: 'string'
+  }
+
 ];
 
 
@@ -48,7 +54,7 @@ try {
    opts = parser.parse(process.argv);
 } catch (e) {
   console.error('Opts parsing error: %s', e.message);
-  process.exit(1);
+  return process.exit(1);
 }
 
 if (opts.help) {
@@ -56,21 +62,26 @@ if (opts.help) {
   console.log('usage: node-check-fast [OPTIONS]\n'
     + 'options:\n'
     + help);
-  process.exit(0);
-}
-
-
-let root = opts.root;
-if(!root){
-  throw ' => node-check-fast => Root must be an absolute path.';
+  // we exit with code=1 because this does not pass any tests
+  return process.exit(1);
 }
 
 const path = require('path');
 const cwd = process.cwd();
 
-if(!path.isAbsolute(root)){
-   root = path.resolve(cwd + '/' + root);
+let root = opts.root;
+if(!root){
+  console.log(' => Warning - no "--root" option was passed at the command line - \n' +
+    'therefore Node-Check-Fast will use the current working directory as root.');
+   root = cwd;
 }
+else{
+  if(!path.isAbsolute(root)){
+    root = path.resolve(cwd + '/' + root);
+  }
+}
+
+
 
 // here we go!
 // we don't pass a callback, so we will exit with the correct message and code
@@ -79,7 +90,7 @@ nfc({
   notPaths: opts.not_paths,
   paths: opts.paths,
   maxDepth: opts.max_depth,
-  verbose: opts.verbose,
+  verbosity: opts.verbosity,
   concurrency: opts.concurrency
 });
 

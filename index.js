@@ -5,10 +5,11 @@ var assert = require('assert');
 var os = require('os');
 var path = require('path');
 var util = require('util');
+var colors = require('colors/safe');
 var flattenDeep = require('lodash.flattendeep');
 var cpuCount = os.cpus().length || 2;
 module.exports = function (opts, cb) {
-    var root = opts.root || '';
+    var root = opts.root || process.cwd();
     assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
     var notPaths = opts.notPaths || ['**/node_modules/**'];
     assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
@@ -27,8 +28,8 @@ module.exports = function (opts, cb) {
                 k.stdin.end();
             });
             k.once('close', function (code) {
-                if (code < 1 && opts.verbose) {
-                    console.log(' => The following file was processed with no syntax errors => ', f);
+                if (code < 1 && opts.verbosity > 1) {
+                    console.log(' => The following file was processed with no syntax errors => \n', f);
                 }
                 cb(code && new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"'), { code: code, file: f });
             });
@@ -41,12 +42,13 @@ module.exports = function (opts, cb) {
                     return r.code > 0;
                 });
                 if (err) {
-                    process.stderr.write('\n => Not all files were necessarily run, because:');
-                    process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results) + '\n\n');
+                    process.stderr.write('\n => Not all files were necessarily run, because we may have exited early..because:');
+                    process.stderr.write('\n ' + colors.red.bold(' => Node check failed for at least one file:') + '\n' + util.inspect(results) + '\n\n');
                     process.exit(1);
                 }
                 else {
-                    console.log(' => ', files.length, ' files checked with "node -c" for directory, and there appear to be zero syntax errors.');
+                    console.log(' => ', files.length, ' files checked with "node -c" for directory => "' + root + '",\n' +
+                        colors.green.bold('...and congratulations there appear to be 0 syntax errors.'));
                     process.exit(0);
                 }
             }
@@ -61,8 +63,10 @@ module.exports = function (opts, cb) {
     var $notPath = notPaths.map(function (p) {
         return ' -not -path \"' + String(p).trim() + '\" ';
     });
-    console.log('$path', util.inspect($path));
-    console.log('$notPath', util.inspect($notPath));
+    if (opts.verbosity > 2) {
+        console.log(' => node-check-fast verbose => "--path" option contents => ', util.inspect($path));
+        console.log(' => node-check-fast verbose => "--not-path" option contents => ', util.inspect($notPath));
+    }
     var cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
     var k = cp.spawn('bash');
     k.stdin.write('\n' + cmd + '\n');

@@ -6,6 +6,7 @@ const assert = require('assert');
 const os = require('os');
 const path = require('path');
 const util = require('util');
+const colors = require('colors/safe');
 
 //npm
 const flattenDeep = require('lodash.flattendeep');
@@ -21,7 +22,7 @@ interface NCFOpts {
   paths?: Array<string>
   maxDepth?: number,
   concurrency?: number,
-  verbose?: boolean
+  verbosity?: number
 }
 
 interface CalledBackData {
@@ -36,17 +37,17 @@ declare type Callback = (err: Error | String, data: Array<CalledBackData>) => vo
 
 export = function (opts: NCFOpts, cb: Callback) {
 
-  const root = opts.root || '';
+  const root = opts.root || process.cwd();
   assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
+
+  const paths = opts.paths || ['*.js'];
+  assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
 
   const notPaths = opts.notPaths || ['**/node_modules/**'];
   assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
 
   const maxDepth = opts.maxDepth || 12;
   assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
-
-  const paths = opts.paths || ['*.js'];
-  assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
 
   const concurrency = opts.concurrency || cpuCount;
   assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
@@ -68,8 +69,8 @@ export = function (opts: NCFOpts, cb: Callback) {
 
       k.once('close', function (code: Number) {
 
-        if (code < 1 && opts.verbose) {
-          console.log(' => The following file was processed with no syntax errors => ', f);
+        if (code < 1 && opts.verbosity > 1) {
+          console.log(' => The following file was processed with no syntax errors => \n', f);
         }
 
         cb(code && new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"'),
@@ -88,12 +89,13 @@ export = function (opts: NCFOpts, cb: Callback) {
         });
 
         if (err) {
-          process.stderr.write('\n => Not all files were necessarily run, because:');
-          process.stderr.write('\n => Node check failed for at least one file:\n' + util.inspect(results) + '\n\n');
+          process.stderr.write('\n => Not all files were necessarily run, because we may have exited early..because:');
+          process.stderr.write('\n ' + colors.red.bold(' => Node check failed for at least one file:') + '\n' + util.inspect(results) + '\n\n');
           process.exit(1);
         }
         else {
-          console.log(' => ', files.length, ' files checked with "node -c" for directory, and there appear to be zero syntax errors.');
+          console.log(' => ', files.length, ' files checked with "node -c" for directory => "' + root +'",\n' +
+            colors.green.bold('...and congratulations there appear to be 0 syntax errors.'));
           process.exit(0);
         }
       }
@@ -113,8 +115,10 @@ export = function (opts: NCFOpts, cb: Callback) {
     return ' -not -path \"' + String(p).trim() + '\" ';
   });
 
-  console.log('$path', util.inspect($path));
-  console.log('$notPath', util.inspect($notPath));
+  if(opts.verbosity > 2){
+    console.log(' => node-check-fast verbose => "--path" option contents => ', util.inspect($path));
+    console.log(' => node-check-fast verbose => "--not-path" option contents => ', util.inspect($notPath));
+  }
 
   const cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
   const k = cp.spawn('bash');
