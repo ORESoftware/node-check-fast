@@ -1,12 +1,16 @@
+
+### folders
+src
+test
 node_modules
 .idea
-@transpile.sh
-@test.sh
-@link.sh
-@build.sh
-@push.sh
-tsconfig-test.json
-tsconfig.json
+scripts
+
+### files
 suman.conf.js
 .gitignore
-test
+.npmignore
+
+### matching
+*.json
+*.md

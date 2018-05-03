@@ -16,11 +16,11 @@ This project does what it says - use the node.js interface or the command line i
 #### ``` npm install -g node-check-fast ```
 
 
-## For usage with Node.js:
+## Programmatic usage with Node.js:
 
 ```js
 
-import * as ncf from 'node-check-fast';
+import ncf from 'node-check-fast';
 
 ncf({
   
@@ -35,6 +35,7 @@ ncf({
     
   // if err is present, a file failed the "node -c" check.
   // results will tell you specifically which files failed
+  // if results is an empty array, not files were checked/matched.
   
 })
 
@@ -56,13 +57,13 @@ Default values used for both command line and JS usage:
 ## Command line interface:
 
 ```bash
-./node_modules/.bin/ncf --root . --not-paths=**/test/** --not-paths=**/node_modules/** --verbosity 3 --concurrency=8
+ncf --root . --not-paths=**/test/** --not-paths=**/node_modules/** --verbosity 3 --concurrency=8
 ```
 
 the terse version of the above is:
 
 ```bash
-./node_modules/.bin/ncf --root . --np=**/test/** --np=**/node_modules/** --v 3 -c 8
+ncf --root . --np=**/test/** --np=**/node_modules/** --v 3 -c 8
 ```
 
 
