@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist",
+    "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-    },
-    "types": [
-      "node"
-    ],
     "target": "es5",
-    "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
     "allowUnreachableCode": true,
@@ -18,10 +15,6 @@
   },
   "compileOnSave": false,
   "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "test",
-    "node_modules"
+    "src"
   ]
 }

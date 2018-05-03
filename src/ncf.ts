@@ -18,7 +18,7 @@ const cpuCount = os.cpus().length || 2;
 
 /////////////////////////////////////////////////////////////////////
 
-interface NCFOpts {
+export interface NCFOpts {
   root: string,
   notPaths?: Array<string>,
   paths?: Array<string>
@@ -27,7 +27,7 @@ interface NCFOpts {
   verbosity?: number
 }
 
-interface CalledBackData {
+export interface CalledBackData {
   code: Number,
   file: string
 }
@@ -52,6 +52,8 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
   
   const concurrency = opts.concurrency || cpuCount;
   assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
+  
+  ////////////////////////////////////////////////////////////////////////////////
   
   const checkAll = function (files: Array<string>, cb: NCFCallback) {
     
@@ -128,7 +130,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
     const files = String(stdout).trim().split('\n').filter(l => l);
     
     if (files.length < 1) {
-      return cb(new Error('No files found.'), []);
+      return cb(null, []);
     }
     
     checkAll(files, cb);

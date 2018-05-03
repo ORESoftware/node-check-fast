@@ -10,10 +10,10 @@ This project does what it says - use the node.js interface or the command line i
 ## Installation
 
 ## Local
-# ``` npm install -D node-check-fast ```
+#### ``` npm install -D node-check-fast ```
 
 ## Global (for command line tools)
-# ``` npm install -g node-check-fast ```
+#### ``` npm install -g node-check-fast ```
 
 
 ## For usage with Node.js:
@@ -62,7 +62,7 @@ Default values used for both command line and JS usage:
 the terse version of the above is:
 
 ```bash
-./node_modules/.bin/ncf --rt . --np=**/test/** --np=**/node_modules/** --v 3 --c=8
+./node_modules/.bin/ncf --root . --np=**/test/** --np=**/node_modules/** --v 3 -c 8
 ```
 
 

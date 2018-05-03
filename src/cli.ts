@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
-process.once('exit', function (code) {
-  console.log(' => node-check-fast exiting with code => ', code);
-});
 
 import {log} from './utils';
-import path = require('path');
+import * as path from 'path';
 const dashdash = require('dashdash');
 import {ncf} from './ncf';
 import colors from 'chalk';
-import util = require('util');
+import * as util from 'util';
+
+process.once('exit', function (code) {
+  log.info('node-check-fast exiting with code => ', code);
+});
+
 
 const options = [
   {
@@ -98,8 +100,13 @@ ncf({
   function (err, results) {
     
     if (err) {
-      log.error('Not all files were necessarily run, because we may have exited early..because:');
-      log.error(colors.red.bold(' => Node check failed for at least one file:') + '\n' + util.inspect(results));
+      log.error('Not all files were necessarily run, because we may have exited early.');
+      log.error('Node check failed for at least one file:', util.inspect(results));
+      return process.exit(1);
+    }
+    
+    if(results.length < 1){
+      log.warn('No files matched, and no files were checked.');
       return process.exit(1);
     }
     
@@ -108,7 +115,7 @@ ncf({
     });
     
     if (successful.length = results.length) {
-      log.info('All your process are belong to success.');
+      log.success('All your process are belong to success.');
       return process.exit(0);
     }
     
