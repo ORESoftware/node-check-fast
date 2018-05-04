@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-
 import {log} from './utils';
 import * as path from 'path';
 const dashdash = require('dashdash');
@@ -11,7 +10,6 @@ import * as util from 'util';
 process.once('exit', function (code) {
   log.info('node-check-fast exiting with code => ', code);
 });
-
 
 const options = [
   {
@@ -87,7 +85,6 @@ else {
   }
 }
 
-
 ncf({
     root: root,
     notPaths: opts.not_paths,
@@ -99,25 +96,33 @@ ncf({
   
   function (err, results) {
     
+    const failures = results.filter(function (r) {
+      return !(r && r.code === 0);
+    });
+    
+    failures.forEach(function (f) {
+      log.warn('code:', f.code, 'file:', f.file)
+    });
+    
     if (err) {
       log.error('Not all files were necessarily run, because we may have exited early.');
-      log.error('Node check failed for at least one file:', util.inspect(results));
+      log.error('Node check failed for at least one file.');
       return process.exit(1);
     }
     
-    if(results.length < 1){
+    if (results.length < 1) {
       log.warn('No files matched, and no files were checked.');
       return process.exit(1);
     }
     
-    const successful = results.filter(function (r) {
-      return r && r.code === 0;
-    });
-    
-    if (successful.length = results.length) {
+    if (failures.length < 1) {
       log.success('All your process are belong to success.');
       return process.exit(0);
     }
+    
+    failures.forEach(function (f) {
+      log.warn('code:', f.code, 'file:', f.file)
+    });
     
     log.error('At least one process exitted with a non-zero code.');
     process.exit(1);

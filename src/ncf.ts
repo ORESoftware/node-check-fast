@@ -52,6 +52,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
   
   const concurrency = opts.concurrency || cpuCount;
   assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
+  log.info('using concurrency:', concurrency);
   
   ////////////////////////////////////////////////////////////////////////////////
   
