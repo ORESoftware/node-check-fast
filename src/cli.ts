@@ -7,8 +7,9 @@ import {ncf} from './ncf';
 import colors from 'chalk';
 import * as util from 'util';
 
+const now = Date.now();
 process.once('exit', function (code) {
-  log.info('node-check-fast exiting with code => ', code);
+  log.info('node-check-fast exiting with code =>', code, ', after', ((Date.now() - now)/1000).toFixed(3), 'seconds.');
 });
 
 const options = [
