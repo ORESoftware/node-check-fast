@@ -10,7 +10,9 @@ scripts
 suman.conf.js
 .gitignore
 .npmignore
+tsconfig.json
+.dockerignore
 
 ### matching
-*.json
 *.md
+*.log
