@@ -1,19 +1,19 @@
 
-# @oresoftware/ncf => Node Check Fast
+# @oresoftware/ncf (Node Check Fast)
 
-This module is designed to be used as part of test suites for Node.js libraries.
+This package is designed to be used as part of test suites for Node.js libraries.
 Running `node -c` for all the files in your project can take a minute.
-
-This project does what it says - use the node.js interface or the command line interface.
+This project does what it says - use the node.js interface, or the command line interface.
 
 ### Installation
 
-## Local
-#### ``` npm install -D '@oresoftware/ncf' ```
-
-## Global (for command line tools)
-#### ``` npm install -g '@oresoftware/ncf' ```
-
+>
+> Local (for programmatic usage)
+> ``` npm install -D '@oresoftware/ncf' ```
+>
+> Global (for command line tools, this makes more sense usally)
+> ``` npm install -g '@oresoftware/ncf' ```
+>
 
 ## Programmatic usage with Node.js:
 
