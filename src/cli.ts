@@ -43,7 +43,7 @@ const options = [
   {
     names: ['concurrency', 'c'],
     type: 'integer',
-    default: 3
+    default: 6
   },
   {
     names: ['root'],

@@ -47,7 +47,7 @@ Default values used for both command line and JS usage:
   root: process.cwd(),   
   paths: ['*.js'],             
   notPaths: ['**/node_modules/**'],        
-  concurrency: os.cpus().length,        
+  concurrency: os.cpus().length || 6,
   maxDepth: 12,          
   verbosity: 2
 
