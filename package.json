@@ -1,6 +1,6 @@
 {
-  "name": "node-check-fast",
-  "version": "0.0.1013",
+  "name": "@oresoftware/ncf",
+  "version": "0.0.1014",
   "description": "Run 'node -c' quickly on .js files in a project",
   "bin": {
     "ncf": "dist/cli.js",
