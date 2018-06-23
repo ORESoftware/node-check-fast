@@ -4,12 +4,19 @@ import {log} from './utils';
 import * as path from 'path';
 const dashdash = require('dashdash');
 import {ncf} from './ncf';
-import colors from 'chalk';
+import  chalk from 'chalk';
 import * as util from 'util';
 
 const now = Date.now();
 process.once('exit', function (code) {
-  log.info('node-check-fast exiting with code =>', code, ', after', ((Date.now() - now)/1000).toFixed(3), 'seconds.');
+  if(code > 0){
+    log.warn(chalk.bold('ncf exiting with code =>'), chalk.magentaBright.bold(String(code)), 'after',
+      ((Date.now() - now)/1000).toFixed(3), 'seconds.');
+  }
+  else{
+    log.success(chalk.gray('ncf exiting with exit code =>'), chalk.cyan.bold(String(code)), 'after',
+      chalk.cyan(((Date.now() - now)/1000).toFixed(3)), 'seconds.');
+  }
 });
 
 const options = [
@@ -117,15 +124,15 @@ ncf({
     }
     
     if (failures.length < 1) {
-      log.success('All your process are belong to success.');
+      log.success(chalk.green.bold('All your process are belong to success.'));
       return process.exit(0);
     }
     
     failures.forEach(function (f) {
-      log.warn('code:', f.code, 'file:', f.file)
+      log.warn('code:', f.code, 'file:', chalk.red(f.file))
     });
     
-    log.error('At least one process exitted with a non-zero code.');
+    log.error(chalk.red('At least one process exitted with a non-zero code.'));
     process.exit(1);
     
   });
