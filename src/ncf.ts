@@ -39,23 +39,28 @@ declare type NCFCallback = (err?: Error | String, data?: Array<CalledBackData>) 
 
 export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
-  const root = opts.root || process.cwd();
-  assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
+  let root, paths, notPaths, maxDepth, concurrency;
 
-  const paths = opts.paths || ['*.js'];
-  assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
+  try {
+    root = opts.root || process.cwd();
+    assert(path.isAbsolute(root), ' => node-check-fast => Root must be an absolute path.');
 
-  const notPaths = opts.notPaths || ['**/node_modules/**'];
-  assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
+    paths = opts.paths || ['*.js'];
+    assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
 
-  const maxDepth = opts.maxDepth || 12;
-  assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
+    notPaths = opts.notPaths || ['**/node_modules/**'];
+    assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
 
-  const concurrency = opts.concurrency || cpuCount;
-  assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
-  log.info('using concurrency:', concurrency);
+    maxDepth = opts.maxDepth || 12;
+    assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
 
-  ////////////////////////////////////////////////////////////////////////////////
+    concurrency = opts.concurrency || cpuCount;
+    assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
+    log.info('using concurrency:', concurrency);
+  }
+  catch (err) {
+    return process.nextTick(cb, err);
+  }
 
 
   const results = [] as Array<any>;
