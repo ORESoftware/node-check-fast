@@ -22,6 +22,16 @@ ncf(){
   command ncf $@;
 }
 
+node_check_fast(){
+  ncf $@;
+}
+
+node-check-fast(){
+  ncf $@;
+}
+
 
 export -f ncf;
+export -f node_check_fast;
 export -f get_latest_ncf;
+export -f node-check-fast;
