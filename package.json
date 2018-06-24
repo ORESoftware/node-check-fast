@@ -1,14 +1,16 @@
 {
   "name": "@oresoftware/ncf",
   "version": "0.0.1017",
-  "description": "Run 'node -c' quickly on .js files in a project",
+  "description": "Run 'node -c' quickly on multiple files in a project",
   "bin": {
     "ncf": "dist/cli.js",
-    "node-check-fast": "dist/cli.js"
+    "node-check-fast": "dist/cli.js",
+    "node_check_fast": "dist/cli.js"
   },
   "main": "dist/ncf.js",
   "scripts": {
-    "test": "suman"
+    "test": "suman test",
+    "postinstall": "./assets/postinstall.sh"
   },
   "repository": {
     "type": "git",
@@ -24,7 +26,7 @@
     "test",
     "testing"
   ],
-  "author": "Olegzandr",
+  "author": "Olegzandr VD",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ORESoftware/node-check-fast/issues"
