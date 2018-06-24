@@ -13,13 +13,6 @@ if [[ "$oresoftware_local_dev" == "yes" ]]; then
     echo "Running the ncf postinstall script in oresoftware local development env."
 fi
 
-ncf_gray='\033[1;30m'
-ncf_magenta='\033[1;35m'
-ncf_cyan='\033[1;36m'
-ncf_orange='\033[1;33m'
-ncf_green='\033[1;32m'
-ncf_no_color='\033[0m'
-
 
 mkdir -p "$HOME/.oresoftware/bash" || {
   echo "could not create oresoftware/bash dir."
@@ -56,11 +49,8 @@ cat assets/shell.sh > "$HOME/.oresoftware/bash/ncf.sh" || {
 )
 
 
-
-echo -e "${ncf_green}ncf was installed successfully.${ncf_no_color}";
+echo; echo -e "${ores_green} => ncf (node-check-fast) was installed successfully.${ores_no_color}";
 echo -e "Add the following line to your .bashrc/.bash_profile files:";
-echo -e "${ncf_cyan} . \"\$HOME/.oresoftware/shell.sh\"${ncf_no_color}";
-echo " ";
-
+echo -e "${ores_cyan} . \"\$HOME/.oresoftware/shell.sh\"${ores_no_color}"; echo;
 
 
