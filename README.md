@@ -19,7 +19,7 @@ This project does what it says - use the node.js interface, or the command line 
 
 ```js
 
-import ncf from 'node-check-fast';
+import ncf from '@oresoftware/ncf';
 
 ncf({
   
