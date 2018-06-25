@@ -11,7 +11,6 @@ import readline = require('readline');
 //npm
 import chalk from 'chalk';
 
-
 //project
 import {makeProcessFile} from "./process-files";
 import log from './utils';
@@ -73,8 +72,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
   const results = [] as Array<any>;
   const q = async.queue((task: any, cb) => task(cb), c);
-  const processFile = makeProcessFile(q, results, opts);
-
+  const processFile = makeProcessFile(results, opts);
 
   let first = true, closed = false;
   const final = q.drain = q.error = function (err?: any) {

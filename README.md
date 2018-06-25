@@ -22,8 +22,11 @@ find -path "*.js" -type f -not -path "**/node_modules/**" | ncf --stdin
 ```
 
 Yeah don't do that. We can use sane defaults instead.
+Instead do this:
 
-
+```bash
+ ncf -c 9    # by default we search with the above settings
+```
 
 ## Programmatic usage with Node.js:
 
@@ -66,13 +69,13 @@ Default values used for both command line and JS usage:
 ## Command line interface:
 
 ```bash
-ncf --root . --not-paths=**/test/** --not-paths=**/node_modules/** --verbosity 3 --concurrency=8
+ncf --dir . --not-paths=**/test/** --not-paths=**/node_modules/** --verbosity 3 --concurrency=8
 ```
 
 the terse version of the above is:
 
 ```bash
-ncf --root . --np=**/test/** --np=**/node_modules/** --v 3 -c 8
+ncf -d . --np=**/test/** --np=**/node_modules/** --v 3 -c 8
 ```
 
 

@@ -58,7 +58,7 @@ const options = [
     default: 6
   },
   {
-    names: ['stdin'],
+    names: ['stdin', 's'],
     type: 'bool',
     help: 'Read from stdin.'
   },
@@ -109,16 +109,14 @@ if (opts.stdin) {
   const c = opts.concurrency || 6;
   const results = [] as Array<any>;
   const q = async.queue((task: any, cb) => task(cb), c);
-  const processFile = makeProcessFile(q, results, opts);
+  const processFile = makeProcessFile(results, opts);
 
   rl.on('line', function (f) {
     q.push(processFile(String(f)));
   });
 
-
   let closed = false;
-
-  rl.on('close', function () {
+  rl.on('close',  () => {
     closed = true;
   });
 
@@ -131,6 +129,7 @@ if (opts.stdin) {
       handleResults(err, results);
     }
     else if (first && closed) {
+      // note: if drain is called before closed is true, we aren't ready to exit yet
       handleResults(err, results);
     }
 

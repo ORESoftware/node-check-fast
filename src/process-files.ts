@@ -11,7 +11,7 @@ import {AsyncQueue} from "async";
 
 /////////////////////////////////////////////////////////////////////////////////
 
-export const makeProcessFile = function (q: AsyncQueue<any>, results: Array<any>, opts: any) {
+export const makeProcessFile = function (results: Array<any>, opts: any) {
 
   return function processFile(f: string) {
 
