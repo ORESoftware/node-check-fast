@@ -1,6 +1,6 @@
 {
   "name": "@oresoftware/ncf",
-  "version": "0.0.1019",
+  "version": "0.0.1020",
   "description": "Run 'node -c' quickly on multiple files in a project",
   "bin": {
     "ncf": "dist/cli.js",
