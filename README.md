@@ -15,6 +15,16 @@ This project does what it says - use the node.js interface, or the command line 
 > ``` npm install -g '@oresoftware/ncf' ```
 >
 
+### In the beginning:
+
+```bash
+find -path "*.js" -type f -not -path "**/node_modules/**" | ncf --stdin
+```
+
+Yeah don't do that. We can use sane defaults instead.
+
+
+
 ## Programmatic usage with Node.js:
 
 ```js

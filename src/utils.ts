@@ -8,3 +8,5 @@ export const log = {
   error: console.error.bind(console, chalk.magenta.bold('ncf error:')),
   success: console.error.bind(console, chalk.green.bold('ncf success:')),
 };
+
+export default log;

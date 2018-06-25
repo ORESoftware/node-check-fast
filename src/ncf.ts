@@ -1,14 +1,23 @@
 'use strict';
 
-import {log} from './utils';
-import async = require('async');
+//core
 import cp = require('child_process');
 import assert = require('assert');
 import os = require('os');
 import path = require('path');
 import util = require('util');
 import readline = require('readline');
-import colors from 'chalk';
+
+//npm
+import chalk from 'chalk';
+
+
+//project
+import {makeProcessFile} from "./process-files";
+import log from './utils';
+import async = require('async');
+import {handleResults} from "./handle-results";
+
 
 const flattenDeep = function (a: Array<any>): Array<any> {
   return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), []);
@@ -39,7 +48,7 @@ declare type NCFCallback = (err?: Error | String, data?: Array<CalledBackData>) 
 
 export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
-  let root, paths, notPaths, maxDepth, concurrency;
+  let root, paths, notPaths, maxDepth, c;
 
   try {
     root = opts.root || process.cwd();
@@ -54,58 +63,33 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
     maxDepth = opts.maxDepth || 12;
     assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
 
-    concurrency = opts.concurrency || cpuCount;
-    assert(Number.isInteger(concurrency), ' => "concurrency" option must be an integer.');
-    log.info('using concurrency:', concurrency);
+    c = opts.concurrency || cpuCount;
+    assert(Number.isInteger(c), ' => "concurrency" option must be an integer.');
+    log.info('using concurrency:', c);
   }
   catch (err) {
     return process.nextTick(cb, err);
   }
 
-
   const results = [] as Array<any>;
+  const q = async.queue((task: any, cb) => task(cb), c);
+  const processFile = makeProcessFile(q, results, opts);
 
-  const processFile = function (f: string) {
 
-    return function (cb: any) {
+  let first = true, closed = false;
+  const final = q.drain = q.error = function (err?: any) {
 
-      const k = cp.spawn('bash');
-      k.stdin.end(`node -c "${f}";\n`);
-
-      k.once('exit', function (code) {
-
-        if (code < 1 && opts.verbosity > 1) {
-          log.info('The following file was processed with no syntax errors:', colors.blueBright(f));
-        }
-
-        let err = null;
-
-        if (code > 0) {
-          err = new Error('Exit code of "node -c" child process was greater than 0 for file => "' + f + '"');
-        }
-
-        results.push({code: code, file: f});
-
-        cb(err);
-
-      });
-
+    if (err && first) {
+      first = false;
+      q.kill();
+      handleResults(err, results);
     }
+    else if (first && closed) {
+      handleResults(err, results);
+    }
+
+    first = false;
   };
-
-
-  const q = async.queue(function (task: any, cb) {
-    task(cb);
-  }, concurrency);
-
-  const final = function (err?: any) {
-    q.kill();
-    cb(err, results);
-  };
-
-  q.drain = final;
-  q.error = final;
-
 
   const $base = ['find', `${root}`].join(' ');
   const $maxD = ['-maxdepth', `${maxDepth}`].join(' ');
@@ -127,8 +111,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
   const cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
   const k = cp.spawn('bash');
 
-  k.stdin.end('\n' + cmd + '\n');
-
+  k.stdin.end(cmd);
   k.stdout.setEncoding('utf8');
   k.stderr.setEncoding('utf8');
 
@@ -140,6 +123,10 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
   rl.on('line', function (f: string) {
     q.push(processFile(f));
+  });
+
+  rl.once('close', function(){
+    closed = true;
   });
 
   k.stderr.on('data', function (d: string) {

@@ -2,20 +2,25 @@
 
 import {log} from './utils';
 import * as path from 'path';
+import readline = require('readline');
+
 const dashdash = require('dashdash');
 import {ncf} from './ncf';
-import  chalk from 'chalk';
+import chalk from 'chalk';
 import * as util from 'util';
+import {handleResults} from "./handle-results";
+import {makeProcessFile} from "./process-files";
+import async = require('async');
 
 const now = Date.now();
 process.once('exit', function (code) {
-  if(code > 0){
+  if (code > 0) {
     log.warn(chalk.bold('ncf exiting with code =>'), chalk.magentaBright.bold(String(code)), 'after',
-      ((Date.now() - now)/1000).toFixed(3), 'seconds.');
+      ((Date.now() - now) / 1000).toFixed(3), 'seconds.');
   }
-  else{
+  else {
     log.success(chalk.gray('ncf exiting with exit code =>'), chalk.cyan.bold(String(code)), 'after',
-      chalk.cyan(((Date.now() - now)/1000).toFixed(3)), 'seconds.');
+      chalk.cyan(((Date.now() - now) / 1000).toFixed(3)), 'seconds.');
   }
 });
 
@@ -53,7 +58,12 @@ const options = [
     default: 6
   },
   {
-    names: ['root'],
+    names: ['stdin'],
+    type: 'bool',
+    help: 'Read from stdin.'
+  },
+  {
+    names: ['root','dir','d'],
     type: 'string',
     default: '.'
   }
@@ -66,16 +76,13 @@ let opts;
 try {
   opts = parser.parse(process.argv);
 } catch (e) {
-  console.error('Opts parsing error: %s', e.message);
+  console.error('Opts parsing error:', e.message);
   process.exit(1);
 }
 
 if (opts.help) {
   const help = parser.help({includeEnv: true}).trimRight();
-  console.log('usage: node-check-fast [OPTIONS]\n'
-    + 'options:\n'
-    + help);
-  // we exit with code=1 because this does not pass any tests
+  console.log('usage: ncf [OPTIONS]\n' + 'options:\n' + help);
   process.exit(1);
 }
 
@@ -84,7 +91,7 @@ const cwd = process.cwd();
 let root = opts.root;
 if (!root) {
   log.info('warning: no "--root" option was passed at the command line');
-  log.info('therefore Node-Check-Fast will use the current working directory as root.');
+  log.info('therefore ncf will use the current working directory as root.');
   root = cwd;
 }
 else {
@@ -93,47 +100,60 @@ else {
   }
 }
 
-ncf({
-    root: root,
-    notPaths: opts.not_paths,
-    paths: opts.paths,
-    maxDepth: opts.max_depth,
-    verbosity: opts.verbosity,
-    concurrency: opts.concurrency
-  },
-  
-  function (err, results) {
-    
-    const failures = results.filter(function (r) {
-      return !(r && r.code === 0);
-    });
-    
-    failures.forEach(function (f) {
-      log.warn('code:', f.code, 'file:', f.file)
-    });
-    
-    if (err) {
-      log.error('Not all files were necessarily run, because we may have exited early.');
-      log.error('Node check failed for at least one file.');
-      return process.exit(1);
-    }
-    
-    if (results.length < 1) {
-      log.warn('No files matched, and no files were checked.');
-      return process.exit(1);
-    }
-    
-    if (failures.length < 1) {
-      log.success(chalk.green.bold('All your process are belong to success.'));
-      return process.exit(0);
-    }
-    
-    failures.forEach(function (f) {
-      log.warn('code:', f.code, 'file:', chalk.red(f.file))
-    });
-    
-    log.error(chalk.red('At least one process exitted with a non-zero code.'));
-    process.exit(1);
-    
+if (opts.stdin) {
+
+  const rl = readline.createInterface({
+    input: process.stdin
   });
+
+  const c = opts.concurrency || 6;
+  const results = [] as Array<any>;
+  const q = async.queue((task: any, cb) => task(cb), c);
+  const processFile = makeProcessFile(q, results, opts);
+
+  rl.on('line', function (f) {
+    q.push(processFile(String(f)));
+  });
+
+
+  let closed = false;
+
+  rl.on('close', function () {
+    closed = true;
+  });
+
+  let first = true;
+  q.drain = q.error = function (err?: any) {
+
+    if (err && first) {
+      first = false;
+      q.kill();
+      handleResults(err, results);
+    }
+    else if (first && closed) {
+      handleResults(err, results);
+    }
+
+    first = false;
+  };
+
+
+}
+else {
+
+  ncf({
+      root: root,
+      notPaths: opts.not_paths,
+      paths: opts.paths,
+      maxDepth: opts.max_depth,
+      verbosity: opts.verbosity,
+      concurrency: opts.concurrency
+    },
+    handleResults
+  );
+
+
+}
+
+
 
