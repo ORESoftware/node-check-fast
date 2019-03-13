@@ -2,8 +2,9 @@
 
 
 get_latest_ncf(){
-  . "$HOME/.oresoftware/bash/ncf.sh"
+  . "$BASH_SOURCE"
 }
+
 
 ncf(){
 
@@ -19,15 +20,15 @@ ncf(){
 
   fi
 
-  command ncf $@;
+  command "$FUNCNAME" "$@";
 }
 
 node_check_fast(){
-  ncf $@;
+  ncf "$@";
 }
 
 node-check-fast(){
-  ncf $@;
+  ncf "$@";
 }
 
 

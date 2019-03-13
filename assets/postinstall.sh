@@ -29,13 +29,13 @@ cat assets/shell.sh > "$HOME/.oresoftware/bash/ncf.sh" || {
 (
 
     shell_file="node_modules/@oresoftware/shell/assets/shell.sh";
-    [ -f "$shell_file" ] && cat "$shell_file" > "$HOME/.oresoftware/shell.sh" && {
+    [[ -f "$shell_file" ]] && cat "$shell_file" > "$HOME/.oresoftware/shell.sh" && {
         echo "Successfully copied @oresoftware/shell/assets/shell.sh to $HOME/.oresoftware/shell.sh";
         exit 0;
     }
 
     shell_file="../shell/assets/shell.sh";
-    [ -f "$shell_file" ] &&  cat "../shell/assets/shell.sh" > "$HOME/.oresoftware/shell.sh" && {
+    [[ -f "$shell_file" ]] &&  cat "../shell/assets/shell.sh" > "$HOME/.oresoftware/shell.sh" && {
         echo "Successfully copied @oresoftware/shell/assets/shell.sh to $HOME/.oresoftware/shell.sh";
         exit 0;
     }

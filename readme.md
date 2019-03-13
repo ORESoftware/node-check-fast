@@ -32,7 +32,9 @@ Instead do this:
 
 ```js
 
-import ncf from '@oresoftware/ncf';
+import ncf from '@oresoftware/ncf';  
+// likewise: const {ncf} = require('@oresoftware/ncf');
+
 
 ncf({
   
@@ -47,7 +49,7 @@ ncf({
     
   // if err is present, a file failed the "node -c" check.
   // results will tell you specifically which files failed
-  // if results is an empty array, not files were checked/matched.
+  // if results is an empty array, no files were checked/matched.
   
 })
 

@@ -41,9 +41,12 @@ export interface CalledBackData {
   file: string
 }
 
-declare type NCFCallback = (err?: Error | String, data?: Array<CalledBackData>) => void;
+declare type NCFCallback = (err: any, data?: Array<CalledBackData>) => void;
 
-//////////////////////////////////////////////////////////////////////
+
+export const r2gSmokeTest = async function(){
+  return true;
+};
 
 export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
@@ -55,9 +58,17 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
 
     paths = opts.paths || ['*.js'];
     assert(Array.isArray(paths), '  => node-check-fast => "path" must be an array.');
+    
+    if(paths.length < 1){
+      paths.push('*.js');
+    }
 
     notPaths = opts.notPaths || ['**/node_modules/**'];
     assert(Array.isArray(notPaths), ' => node-check-fast => "notPaths" must be an array.');
+    
+    if(notPaths.length < 1){
+      notPaths.push('**/node_modules/**');
+    }
 
     maxDepth = opts.maxDepth || 12;
     assert(Number.isInteger(maxDepth), '  => node-check-fast => "maxDepth" must be an integer.');
@@ -89,7 +100,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
     first = false;
   };
 
-  const $base = ['find', `${root}`].join(' ');
+  const $base = ['find', `"${root}"`].join(' ');
   const $maxD = ['-maxdepth', `${maxDepth}`].join(' ');
   const $typeF = ['-type f'];
 
@@ -107,6 +118,7 @@ export const ncf = function (opts: NCFOpts, cb: NCFCallback) {
   }
 
   const cmd = flattenDeep([$base, $maxD, $typeF, $path, $notPath]).join(' ');
+  
   const k = cp.spawn('bash');
 
   k.stdin.end(cmd);
